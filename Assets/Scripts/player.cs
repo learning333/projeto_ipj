@@ -28,22 +28,28 @@ public class player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		if(true){//randomEvents.pausado==false){
+		if(health<=0){
+			Destroy(gameObject);
+		}
+		//Debug.Log(health);
+		if(randomEvents.pausado==false){
 			HandleMovement(); 
+			myanimator.speed=1;
+		}else{//pausado=true
+			myanimator.speed=0;//pausa animacao
 		}
     }
 	
 	private void HandleMovement(){
+		
 		if(isfighting==false && isobstructed==false){
-			transform.Translate(transform.right*moveSpeed*Time.deltaTime);
-			//myrigidbody.velocity= Vector2.right;	//x -1,y=0;
-			//Debug.Log();
-			//myanimator.SetBool("bool_anda",true);
+			transform.Translate(transform.right*moveSpeed*Time.deltaTime);//se nao ta lutando nem obstruido, anda
+
 			handleanimacao(menu.time,"andar");
 		}else{
 			if(isfighting==true){
 			
-			StartCoroutine(BlinkRed());
+			//
 			}
 		}
 	
@@ -51,10 +57,57 @@ public class player : MonoBehaviour
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
 		if(collision.tag=="Enemy"){
-			collision.GetComponent<enemy_new>().LoseHealth();
+			
+			isfighting=true;
+			StartCoroutine(BlinkRed());//se esta lutando chama animacao de losehealth
+			//myanimator.SetBool("bool_br_attack",true);
+			handleanimacao(menu.time,"atacar");
+		}
+		if(collision.tag=="Player"){
+			isobstructed=true;
+		}
+		if(collision.tag=="Out"){
+			GameManager.instance.placar.golHome();
+			Destroy(gameObject);
+		}
+	}
+	
+	private void OnTriggerStay2D(Collider2D collision)
+	{
+		if(collision.tag=="Enemy"){
+			//Debug.Log("lutando");
+			//collision.GetComponent<enemy_new>().LoseHealth();
+			isfighting=true;
+			//collision.GetComponent<enemy_new>().LoseHealth();
+		}
+
+	}
+	
+	private void OnTriggerExit2D(Collider2D collision){
+		if(collision.tag=="Enemy"){
+			//yanimator.SetBool("bool_br_attack",false);
+			handleanimacao(menu.time,"andar");
+			//collision.GetComponent<enemy_new>().LoseHealth();
+			isfighting=false;
+			isobstructed=false;
+		}if(collision.tag=="Player"){
+			
+			isobstructed=false;
+		}
+
+	}
+	/*
+	
+	private void OnTriggerEnter2D(Collider2D collision)
+	{
+		
+		if(collision.tag=="Enemy"){
+			
+			//collision.GetComponent<enemy_new>().LoseHealth();
 			isfighting=true;
 			//myanimator.SetBool("bool_br_attack",true);
 			handleanimacao(menu.time,"atacar");
+			//Debug.Log("ENTER Fighting: "+isfighting+" Obstruceed:"+isobstructed);
 		}
 		if(collision.tag=="Player"){
 			isobstructed=true;
@@ -64,15 +117,34 @@ public class player : MonoBehaviour
 		}
 	}
 	
+	/*
 	private void OnTriggerStay2D(Collider2D collision)
 	{
+		
 		if(collision.tag=="Enemy"){
 			collision.GetComponent<enemy_new>().LoseHealth();
 			isfighting=true;
-			collision.GetComponent<enemy_new>().LoseHealth();
+			Debug.Log("STAY Fighting: "+isfighting+" Obstruceed:"+isobstructed);
 		}
 
 	}
+	
+	
+	private void OnTriggerExit2D(Collider2D collision){
+		if(collision.tag=="Enemy"){
+			Debug.Log("enemy morreu");
+			//yanimator.SetBool("bool_br_attack",false);
+			handleanimacao(menu.time,"andar");
+			//collision.GetComponent<enemy_new>().LoseHealth();
+			isfighting=false;
+			Debug.Log("TRIGER EXIT Fighting: "+isfighting+" Obstruceed:"+isobstructed);
+		}
+		if(collision.tag=="Player"){
+			isobstructed=false;
+		}
+		
+	}*/
+	
 	private void handleanimacao(int filtro,string acao){
 		if(filtro==0){//time red
 			if(acao=="andar"){
@@ -99,20 +171,7 @@ public class player : MonoBehaviour
 	}
 	
 	
-	
-	private void OnTriggerExit2D(Collider2D collision){
-		if(collision.tag=="Enemy"){
-			//yanimator.SetBool("bool_br_attack",false);
-			handleanimacao(menu.time,"andar");
-			//collision.GetComponent<enemy_new>().LoseHealth();
-			isfighting=false;
-		}
-		if(collision.tag=="Player"){
-			isobstructed=false;
-		}
-	}
-	
-	public void LoseHealth(){
+	/*public void LoseHealth(){
 		if(true){//randomEvents.pausado==false){
 			//Debug.Log("player hp: "+health+" pos hit: "+(health-1));
 			//perte hp
@@ -120,21 +179,31 @@ public class player : MonoBehaviour
 			//animared
 			StartCoroutine(BlinkRed());
 			//checa se morreu
-			if(health<=0){
-				Destroy(gameObject);
+
+		}
+	}
+	*/
+	
+	IEnumerator BlinkRed(){
+		if(isfighting==true){
+			int hit_tomado=Random.Range(0,6);//random entre 0 e 5;
+			
+			if(hit_tomado>0){
+				if(randomEvents.pausado==false){ //se nao estiver pausado toma hit e faz animacao
+					health-=hit_tomado;
+					//change sprite renderer pra vermelho
+					GetComponent<SpriteRenderer>().color=Color.red;
+					//wait
+					yield return new WaitForSeconds(0.5f);
+					//volta ao normal
+					GetComponent<SpriteRenderer>().color=Color.white;
+				}
 			}
+			yield return new WaitForSeconds(3f);
+			StartCoroutine(BlinkRed()); //calcula hit tomado a cada 3 segundos
 		}
 	}
 	
-	IEnumerator BlinkRed(){
-		health--;
-		//change sprite renderer pra vermelho
-		GetComponent<SpriteRenderer>().color=Color.red;
-		//wait
-		yield return new WaitForSeconds(0.5f);
-		//volta ao normal
-		GetComponent<SpriteRenderer>().color=Color.white;
-	}
 
 	
 }

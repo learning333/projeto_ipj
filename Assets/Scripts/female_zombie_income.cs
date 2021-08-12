@@ -15,7 +15,7 @@ public class female_zombie_income : MonoBehaviour
 	//muedinha
 	public GameObject obj_coin;
 	private Animator myanimator;
-	
+	private bool isfighting=false;
 	
 	
 	//methods
@@ -31,6 +31,21 @@ public class female_zombie_income : MonoBehaviour
 		}
 		StartCoroutine(Interval());
 	}
+	
+	void Update()
+    {
+		if(health<=0){
+			Destroy(gameObject);
+		}
+		//Debug.Log(health);
+		if(randomEvents.pausado==false){ 
+			myanimator.speed=1;
+		}else{//pausado=true
+			myanimator.speed=0;//pausa animacao
+		}
+    }
+	
+	
 	//interval ienumerator
 	IEnumerator Interval(){
 		yield return new WaitForSeconds(interval);
@@ -40,28 +55,59 @@ public class female_zombie_income : MonoBehaviour
 	}
 	//Trigger income increase
 	public void IncreaseIncome(){
-		//if(randomEvents.pausado==false){
+		if(randomEvents.pausado==false){
 			GameManager.instance.currency.Gain(incomeValue);
-		//}
+		}
 		StartCoroutine(CoinIndication());
 	}
-	//show coin indication over the tower for short time (0.5 second)
+	//show coin indication over the tower for short time (0.7 second)
 	IEnumerator CoinIndication(){
 		obj_coin.SetActive(true);
-		yield return new WaitForSeconds(0.5f);
+		yield return new WaitForSeconds(0.7f);
 		obj_coin.SetActive(false);
 	}
-	//lose health
-	public void LoseHealth(){
-		health--;
-		if(health<=0){
-			morre();
+	
+	
+	private void OnTriggerEnter2D(Collider2D collision)
+	{
+		
+		if(collision.tag=="Enemy"){
+			isfighting=true;
+			StartCoroutine(BlinkRed());
+
 		}
 	}
-	//die
-	public void morre(){
-			//Debug.Log("morreu");
+
+	
+	private void OnTriggerExit2D(Collider2D collision){
+		if(collision.tag=="Enemy"){
+			isfighting=false;
+		}
+
+	}
+	
+
+	IEnumerator BlinkRed(){
+		if(health<=0){
 			Destroy(gameObject);
+		}
+		if(isfighting==true && randomEvents.pausado==false){
+			int hit_tomado=Random.Range(3,9);//random 
+			
+			if(hit_tomado>0){
+				health-=hit_tomado;
+				//change sprite renderer pra vermelho
+				GetComponent<SpriteRenderer>().color=Color.red;
+				//wait
+				yield return new WaitForSeconds(0.5f);
+				//volta ao normal
+				GetComponent<SpriteRenderer>().color=Color.white;
+				
+			}
+			yield return new WaitForSeconds(3f);
+			
+		}
+		StartCoroutine(BlinkRed()); //calcula hit tomado a cada 3 segundos
 	}
 	
 	

@@ -6,6 +6,7 @@ public class currencysystem : MonoBehaviour
 	public Text txt_currency;
 	public int defaultCurrency;
 	public int currency;
+
 	
 	public void Init(){
 		currency=defaultCurrency;
@@ -14,7 +15,12 @@ public class currencysystem : MonoBehaviour
 	
 	public void Gain(int val){
 		currency+=val;
-		Debug.Log("Ganhou "+val);
+		
+		//para efeito da dinamica do randomEvent negativo
+		if(currency<0){
+			currency=0;
+		}
+		//Debug.Log("Ganhou "+val);
 		updateUI();
 	}
 	public bool Use(int val){
@@ -22,7 +28,7 @@ public class currencysystem : MonoBehaviour
 			
 			currency-=val;
 			updateUI();
-			Debug.Log("Gastou "+val);
+			//Debug.Log("Gastou "+val);
 			return true;
 		}else{
 			return false;

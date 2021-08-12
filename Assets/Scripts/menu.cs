@@ -14,12 +14,14 @@ public class menu : MonoBehaviour
 	
 	public static bool pausado=false;
 	
+	public GameObject aux_start;
 	public GameObject[] buttons;
 	public GameObject[] buttons_time;
 	
 	public void Start(){
 		buttons = GameObject.FindGameObjectsWithTag("menu_modo");
 		buttons_time = GameObject.FindGameObjectsWithTag("menu_time");
+		//aux_start=GameObject.FindGameObjectWithName("bt_start");
 		
 		foreach(GameObject button in buttons){
 			button.SetActive(false);
@@ -38,8 +40,10 @@ public class menu : MonoBehaviour
 		}
 		//mostra os botoes de escolha modo
 		foreach(GameObject button in buttons){
+			//Debug.Log(button);
 			button.SetActive(gatilho);
 		}
+		aux_start.SetActive(false);
 	}	
 	
 	public void ChangeScenered(string sceneName){
@@ -60,12 +64,15 @@ public class menu : MonoBehaviour
 		escolheutime=false;
 		time=0;//retorna time para o default
 		gerenciador_ui(escolheutime);
+		aux_start.SetActive(false);
 	}
 	public void btNormal(){
 		startavel=true;
+		aux_start.SetActive(true);
 		//to-do: deixar o botao em destaque
 	}
 	public void btOndas(){
+		aux_start.SetActive(true);
 		startavel=true;
 		modo++;
 		//to-do: deixar o botao em destaque, impedir soma infinita do ++
@@ -74,5 +81,10 @@ public class menu : MonoBehaviour
 		if(startavel==true){
 			SceneManager.LoadScene(sceneName);
 		}
+	}
+	public void btQuit(){
+		Debug.Log("quit");
+		Application.Quit();
+		
 	}
 }

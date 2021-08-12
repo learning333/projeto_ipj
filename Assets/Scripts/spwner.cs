@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class spwner : MonoBehaviour
 {
+	public List<Transform> points;
+	
 	public SpriteRenderer testSprite;
 	//transform os spawning tower root object
 	public Transform spawnTowerRoot;
@@ -44,41 +46,27 @@ public class spwner : MonoBehaviour
 			var cellPosDefault=spawnTilemap.WorldToCell(mousePos);
 			
 			var cel2=spawnTilemap.LocalToWorld(mousePos);
-			Debug.Log(cel2);
+			//Debug.Log(cel2);
 			//get center position
 			var cellPosCentered=spawnTilemap.GetCellCenterWorld(cellPosDefault);
 			
 			//testSprite.transform.position=cellPosCentered;
 			
 			//check if lugar é spawnavel
-			Debug.Log("GET:"+spawnTilemap.GetColliderType(cellPosDefault)+"EXPECTED:"+Tile.ColliderType.Sprite);
+			//Debug.Log("GET:"+spawnTilemap.GetColliderType(cellPosDefault)+"EXPECTED:"+Tile.ColliderType.Sprite);
 			if(spawnTilemap.GetColliderType(cellPosDefault)==Tile.ColliderType.Sprite){
-				Debug.Log("chegou");
+
 				int towercost=TowerCost();//towersPrefabs[spawnID].GetComponent<tower>().cost;
 				
-				//checar se tem mueda suficiente
-				if(GameManager.instance.currency.enoughCurrency(TowerCost())){
+				//checar se tem moeda suficiente
+				if(GameManager.instance.currency.enoughCurrency(TowerCost()) && randomEvents.pausado==false){
 					//Debug.Log("towercost="+towercost);
 					GameManager.instance.currency.Use(towercost);
 					//spawn
-					Debug.Log("placeando tower");
 					SpawnTower(cellPosCentered);
-					//Disable the collider?
-					//spawnTilemap.SetColliderType(cellPosDefault,Tile.ColliderType.None);
-					// test enable sprite
-					//testSprite.enabled=true;
-				}else{
-					//Debug.Log("sem mueda");
+					enemiespawn.contaSpawnGlobal++;
 				}
-			}else{
-				Debug.Log("nao chegou");
-				//Disable test sprite
-				//testSprite.enabled=false;
-				//enable collider
-				//spawnTilemap.SetColliderType(cellPosDefault,Tile.ColliderType.Sprite);
-				
-			}
-			//Debug.Log(cellPosDefault);		
+			}			
 			
 		}
 		
@@ -88,20 +76,24 @@ public class spwner : MonoBehaviour
 		switch(spawnID){
 			//case 1 female zombie
 			case 1: return towersPrefabs[1].GetComponent<female_zombie_income>().cost;
-			//case 1: return towersPrefabs[0].GetComponent<tower_pinka>().cost;
+			
 			case 0: return towersPrefabs[0].GetComponent<player>().cost;
 			default:return -1;
 		}
 	}		
 	void SpawnTower(Vector3 position){
-		GameObject tower=Instantiate(towersPrefabs[spawnID],spawnTowerRoot);
+		//GameObject tower=Instantiate(towersPrefabs[spawnID],spawnTowerRoot);
+		float cordy=position.y-1.5f;
+		int cordy2=(int)cordy;
+		//Debug.Log(cordy2);
+		GameObject tower=Instantiate(towersPrefabs[spawnID],points[cordy2]);
 		tower.transform.position=position;
 		
-		//tower.GetComponent<tower>().Init();
+
 		
 		DeselectTower();
 
-		//EnemySpawner.instance.StartSpawning();
+
 	}
 	
 	
